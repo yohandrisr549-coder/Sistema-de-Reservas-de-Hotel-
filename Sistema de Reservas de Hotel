@@ -1,0 +1,178 @@
+using System;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
+class HabitaciónHotel
+{
+    public int Numero { get; }
+
+    private string tipo;
+    public string Tipo
+    {
+        get { return tipo; }
+        set
+        {
+            if (value == "Individual" || value == "Doble" || value == "Suite")
+            {
+                tipo = value;
+            }
+        }
+    }
+
+    private double precioPorNoche;
+    public double PrecioPorNoche
+    {
+        get { return precioPorNoche; }
+        set
+        {
+            if (value > 0)
+            {
+                precioPorNoche = value;
+            }
+        }
+    }
+
+    public bool Disponible { get; private set; }
+    public string ClienteActual { get; private set; }
+
+
+    // Constructor
+    public HabitaciónHotel(int numero, string tipo, double precioPorNoche)
+    {
+        Numero = numero;
+        Tipo = tipo;
+        PrecioPorNoche = precioPorNoche;
+        Disponible = true;
+        ClienteActual = "";
+    }
+
+    // Metodo Reservar
+    public double Reservar(string nombreCliente, int noches)
+    {
+        if (Disponible == true)
+        {
+            Disponible = false;
+            ClienteActual = nombreCliente;
+
+            return PrecioPorNoche * noches;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+
+    // Liberar habitacion
+    public bool Liberar()  
+    {
+        if (Disponible == false)
+        {
+            Disponible = true;
+            ClienteActual = "";
+            return true;
+        }
+        else
+        {
+            return false; 
+        }
+    }
+
+    // mostrar informacion de la habitacion
+    public string MostrarInfo()
+    {
+        string estado;
+
+        if (Disponible == true)
+        {
+            estado = "Disponible";
+        }
+        else
+        {
+            estado = "Ocupada";
+        }
+
+        return "Numero: " + Numero +
+               "\nTipo: " + Tipo +
+               "\nPrecio por noche: $" + PrecioPorNoche +        
+               "\nEstado: " + estado +
+               "\nCliente actual: " + ClienteActual;
+    }
+
+    // Aplicar descuento
+    public void AplicarDescuento(int porcentaje)
+    {
+        if (porcentaje >= 0 && porcentaje <= 100)
+        {
+            PrecioPorNoche = PrecioPorNoche -
+                             (PrecioPorNoche * porcentaje / 100);
+        }
+    }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        // Crear las habitaciones
+        HabitaciónHotel cuartoA = new HabitaciónHotel(101, "Individual", 50000);
+        HabitaciónHotel cuartoB = new HabitaciónHotel(202, "Doble", 80000);
+        HabitaciónHotel cuartoC = new HabitaciónHotel(303, "Suite", 150000);
+
+        HabitaciónHotel[] listaHabitaciones = { cuartoA, cuartoB, cuartoC };  //
+
+        // Mostrar estado inicial
+        Console.WriteLine("ESTADO INICIAL");
+
+        foreach (HabitaciónHotel cuarto in listaHabitaciones)
+        {
+            Console.WriteLine(cuarto.MostrarInfo());
+            Console.WriteLine("--------------------");
+        }
+
+        // Reservar habitacion 101
+        double totalReserva = cuartoA.Reservar("lana rhoades", 3);
+        Console.WriteLine("Total de la primera reserva: $" + totalReserva);
+
+        // Reservar habitacion 202
+        totalReserva = cuartoB.Reservar("abenya danger", 2);
+        Console.WriteLine("Total de la segunda reserva: $" + totalReserva);
+
+        // Intentar reservar nuevamente la habitacion 101
+        totalReserva = cuartoA.Reservar("luisito comunica", 2);
+        Console.WriteLine("Resultado del segundo intento: " + totalReserva);
+
+        // Liberar habitacion 101
+        bool resultadoLiberacion = cuartoA.Liberar();
+        Console.WriteLine("¿Se libero el cuarto A? " + resultadoLiberacion);
+
+        // Aplicar descuento del 10% al cuarto C
+        cuartoC.AplicarDescuento(10);
+        Console.WriteLine("Precio de la suite con descuento: $" + cuartoC.PrecioPorNoche);
+
+        // Nueva reserva de la habitacion 101
+        totalReserva = cuartoA.Reservar("", 1);
+        Console.WriteLine("Total de la nueva reserva: $" + totalReserva);
+
+        // Mostrar estado final
+        Console.WriteLine("\nESTADO FINAL");
+
+        foreach (HabitaciónHotel cuarto in listaHabitaciones)
+        {
+            Console.WriteLine(cuarto.MostrarInfo());
+            Console.WriteLine("--------------------");
+        }
+
+        // Contar habitaciones ocupadas
+        int cantidadOcupadas = 0;
+
+        foreach (HabitaciónHotel cuarto in listaHabitaciones)
+        {
+            if (cuarto.Disponible == false)
+            {
+                cantidadOcupadas++;
+            }
+        }
+
+        Console.WriteLine("Cantidad de habitaciones ocupadas: " + cantidadOcupadas);
+        Console.WriteLine("Programa finalizado.");
+    }
+}
